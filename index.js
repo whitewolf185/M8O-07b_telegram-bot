@@ -76,29 +76,36 @@ start.then(
 
         let queueListening = {
             bool: false,
-            first: true,
             queue: [],
             str: '',
-            count: 0
+            count: 0,
+            chat_id: 0
         };
 
         bot.onText(/\/newqueue/, (msg) => {
-            if (options.trustedUsers.indexOf(msg.from.id) === -1){
+            console.log('im in queue');
+            if (queueListening.bool){
+                bot.sendMessage(msg.chat.id, "очередь уже запущена");
+            }
+            else if (options.trustedUsers.indexOf(msg.from.id) === -1){
                 bot.sendMessage(msg.chat.id, "Ты не достоин");
             }
             else{
                 console.log("im here");
-                bot.sendMessage(msg.chat.id, "Начинаю очередь...\nПишите _Я_, если хотите добавиться в очердь.",{
+                bot.sendMessage(msg.chat.id, "Начинаю очередь...\nПишите _/Я_, если хотите добавиться в очердь.",{
                     parse_mode: "Markdown"
                 });
                 queueListening.bool = true;
+                queueListening.chat_id = msg.chat.id;
+
+                write_to_log("User " + msg.from.username + ' started queue');
             }
         })
 
         bot.onText(/\/donequeue/, (msg) => {
             if(queueListening.bool){
                 queueListening.str = create_queue(queueListening);
-                bot.sendMessage(msg.chat.id, "*Вот такая наша очередь:*\n" + queueListening.str ,{
+                bot.sendMessage(queueListening.chat_id, "*Вот такая наша очередь:*\n" + queueListening.str ,{
                     parse_mode: "Markdown"
                 });
             }
@@ -107,13 +114,13 @@ start.then(
 
         bot.onText(/\/showqueue/, (msg) => {
             if(queueListening.bool){
-                bot.sendMessage(msg.chat.id, "*Сейчас очередь такая:*\n" + queueListening.str ,{
+                bot.sendMessage(queueListening.chat_id, "*Сейчас очередь такая:*\n" + queueListening.str ,{
                     parse_mode: "Markdown"
                 });
             }
         })
 
-        bot.onText(/07b_bot я достоин/, (msg) => {
+        bot.onText(/\/07b_bot я достоин/, (msg) => {
             console.log('requested');
             bot.sendMessage(475513670, msg.from.username + " достоин?");
             question.bool = true;
@@ -127,9 +134,12 @@ start.then(
         bot.on('message', (msg) => {
             if(question.bool){
                 if(msg.from.id === 475513670){
-                    if(msg.text.toLowerCase() === '07b_bot да') {
+                    if(msg.text.toLowerCase() === '/07b_bot да') {
                         add_trusted_users(question);
                         bot.sendMessage(question.chat, "Добро пожаловать " + question.username);
+
+                        write_to_log(question.username + ' | id:' + question.who + ' has got access to trusted Users');
+
                         question.bool = false;
                     }
 
@@ -141,7 +151,7 @@ start.then(
             }
 
             else if(queueListening){
-                if(msg.text.toLowerCase() === 'я' && queueListening.queue.indexOf(msg.from.username) === -1){
+                if(msg.text.toLowerCase() === '/я' && queueListening.queue.indexOf(msg.from.username) === -1){
                     console.log('added');
                     queueListening.count++;
                     queueListening.queue.push(msg.from.username);
