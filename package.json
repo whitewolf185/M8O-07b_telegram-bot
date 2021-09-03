@@ -1,0 +1,23 @@
+{
+  "name": "m8o-07b_bot",
+  "version": "0.0.5",
+  "description": "Telegram bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whitewolf185/M8O-07b_telegram-bot.git"
+  },
+  "author": "whitewolf185",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/whitewolf185/M8O-07b_telegram-bot/issues"
+  },
+  "homepage": "https://github.com/whitewolf185/M8O-07b_telegram-bot#readme",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.54.0",
+    "readline-sync": "^1.4.10"
+  }
+}
