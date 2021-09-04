@@ -153,12 +153,22 @@ start.then(
 
                         write_to_log(question.username + ' | id:' + question.who + ' has got access to trusted Users');
 
-                        question.bool = false;
+                        question = {
+                            bool: false,
+                            who: 0,
+                            username: '',
+                            chat: 0
+                        };
                     }
 
                     else{
                         bot.sendMessage(question.chat, "Мне сказали ты не достоин");
-                        question.bool = false;
+                        question = {
+                            bool: false,
+                            who: 0,
+                            username: '',
+                            chat: 0
+                        }
                     }
                 }
             }
@@ -180,9 +190,9 @@ start.then(
 
                     bot.sendMessage(msg.chat.id, msg.from.username + ' добавлен ' + queueListening.count + '-м');
                 }
-                else if(msg.text.search(/я \d+$/) !== -1 &&
+                else if(msg.text.toLowerCase().search(/^я \d{1,2}$/) !== -1 &&
                     queueListening.queue.map(i => i.ID).indexOf(msg.from.id) === -1){
-                    let index = msg.text.split(' ')[1];
+                    let index = parseInt(msg.text.split(' ')[1]);
 
                     if( index <= 0 || index > 31){
                         bot.sendMessage(msg.chat.id, 'ты, блять, тупой?');
@@ -201,6 +211,14 @@ start.then(
                     else{
                         bot.sendMessage(msg.chat.id, 'Место занято');
                     }
+                }
+
+                else if (msg.text.toLowerCase().search(/^я минус$/) !== -1 &&
+                    queueListening.queue.map(i => i.ID).indexOf(msg.from.id) !== -1)
+                {
+                    let index = queueListening.map(i => i.ID).indexOf(msg.from.id);
+                    queueListening.queue[index] = undefined;
+                    bot.sendMessage(msg.chat.id, `${index+1}-е место освободилось`);
                 }
             }
 
