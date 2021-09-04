@@ -19,9 +19,13 @@ function add_trusted_users(question){
 }
 
 function create_queue(queueListening){
+    console.log('creating a queue')
+    console.log(queueListening.queue.length);
+
     let str = '';
     for (let i = 0; i < queueListening.queue.length; i++) {
-        str += (i+1) + '. ' + queueListening.queue[i] + '\n';
+        if(queueListening.queue[i] !== undefined)
+            str += (i+1) + '. ' + queueListening.queue[i].username + ' (' + queueListening.queue[i].name + ')' + '\n';
     }
 
     return str;
@@ -92,7 +96,7 @@ start.then(
             }
             else{
                 console.log("im here");
-                bot.sendMessage(msg.chat.id, "Начинаю очередь...\nПишите _/Я_, если хотите добавиться в очердь.",{
+                bot.sendMessage(msg.chat.id, "Начинаю очередь...\nПишите _Я_, если хотите добавиться в очердь, или _я 'число'_, если хотите на определенное место",{
                     parse_mode: "Markdown"
                 });
                 queueListening.bool = true;
@@ -105,15 +109,24 @@ start.then(
         bot.onText(/\/donequeue/, (msg) => {
             if(queueListening.bool){
                 queueListening.str = create_queue(queueListening);
+                console.log(queueListening.str);
                 bot.sendMessage(queueListening.chat_id, "*Вот такая наша очередь:*\n" + queueListening.str ,{
                     parse_mode: "Markdown"
                 });
             }
-            queueListening.bool = false;
+            queueListening = {
+                bool: false,
+                queue: [],
+                str: '',
+                count: 0,
+                chat_id: 0
+            };
         })
 
         bot.onText(/\/showqueue/, (msg) => {
             if(queueListening.bool){
+                console.log(queueListening);
+                queueListening.str = create_queue(queueListening);
                 bot.sendMessage(queueListening.chat_id, "*Сейчас очередь такая:*\n" + queueListening.str ,{
                     parse_mode: "Markdown"
                 });
@@ -134,7 +147,7 @@ start.then(
         bot.on('message', (msg) => {
             if(question.bool){
                 if(msg.from.id === 475513670){
-                    if(msg.text.toLowerCase() === '/07b_bot да') {
+                    if(msg.text.toLowerCase() === '07b_bot да') {
                         add_trusted_users(question);
                         bot.sendMessage(question.chat, "Добро пожаловать " + question.username);
 
@@ -150,16 +163,48 @@ start.then(
                 }
             }
 
-            else if(queueListening){
-                if(msg.text.toLowerCase() === '/я' && queueListening.queue.indexOf(msg.from.username) === -1){
+            else if(queueListening.bool){
+                if(msg.text.toLowerCase() === 'я' &&
+                    queueListening.queue.map(i => i.ID).indexOf(msg.from.id) === -1){
+
+                    while(queueListening.queue[queueListening.count] !== undefined){
+                        queueListening.count++;
+                    }
                     console.log('added');
+                    queueListening.queue[queueListening.count] = {
+                        username: msg.from.username.replace(/[_*]/g,''),
+                        name: msg.from.first_name,
+                        ID: msg.from.id
+                    };
                     queueListening.count++;
-                    queueListening.queue.push(msg.from.username);
+
                     bot.sendMessage(msg.chat.id, msg.from.username + ' добавлен ' + queueListening.count + '-м');
+                }
+                else if(msg.text.search(/я \d+$/) !== -1 &&
+                    queueListening.queue.map(i => i.ID).indexOf(msg.from.id) === -1){
+                    let index = msg.text.split(' ')[1];
+
+                    if( index <= 0 || index > 31){
+                        bot.sendMessage(msg.chat.id, 'ты, блять, тупой?');
+                        index = 0;
+                    }
+
+                    else if (queueListening.queue[index - 1] === undefined){
+                        queueListening.queue[index - 1] = {
+                            username: msg.from.username.replace(/[_*]/g,''),
+                            name: msg.from.first_name,
+                            ID: msg.from.id
+                        };
+
+                        bot.sendMessage(msg.chat.id, msg.from.username + ' добавлен ' + index + '-м');
+                    }
+                    else{
+                        bot.sendMessage(msg.chat.id, 'Место занято');
+                    }
                 }
             }
 
-            console.log(msg);
+            // console.log(msg);
         })
 
 
