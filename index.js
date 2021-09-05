@@ -216,7 +216,8 @@ start.then(
                 else if (msg.text.toLowerCase().search(/^я минус$/) !== -1 &&
                     queueListening.queue.map(i => i.ID).indexOf(msg.from.id) !== -1)
                 {
-                    let index = queueListening.map(i => i.ID).indexOf(msg.from.id);
+                    let index = queueListening.queue.map(i => i.ID).indexOf(msg.from.id);
+                    console.log('im minus');
                     queueListening.queue[index] = undefined;
                     bot.sendMessage(msg.chat.id, `${index+1}-е место освободилось`);
                 }
