@@ -1,6 +1,6 @@
 {
   "name": "m8o-07b_bot",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "description": "Telegram bot",
   "main": "index.js",
   "scripts": {
