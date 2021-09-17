@@ -18,13 +18,31 @@ function add_trusted_users(question){
     fs.writeFileSync(__dirname + '/options.txt', JSON.stringify(options));
 }
 
+function clean_queue(queueListening){
+    for (let i = 0; i < 32; i++) {
+        queueListening.queue[i] = {
+            username: undefined,
+            name: undefined,
+            ID: undefined
+        }
+    }
+}
+
+function clean_elem(queueListening, index){
+    queueListening.queue[index] = {
+        username: undefined,
+        name: undefined,
+        ID: undefined
+    }
+}
+
 function create_queue(queueListening){
     console.log('creating a queue')
     console.log(queueListening.queue.length);
 
     let str = '';
     for (let i = 0; i < queueListening.queue.length; i++) {
-        if(queueListening.queue[i] !== undefined)
+        if(queueListening.queue[i].ID !== undefined)
             str += (i+1) + '. ' + queueListening.queue[i].username + ' (' + queueListening.queue[i].name + ')' + '\n';
     }
 
@@ -85,6 +103,7 @@ start.then(
             count: 0,
             chat_id: 0
         };
+        clean_queue(queueListening);
 
         bot.onText(/\/newqueue/, (msg) => {
             console.log('im in queue');
@@ -121,6 +140,7 @@ start.then(
                 count: 0,
                 chat_id: 0
             };
+            clean_queue(queueListening)
         })
 
         bot.onText(/\/showqueue/, (msg) => {
@@ -177,10 +197,13 @@ start.then(
                 if(msg.text.toLowerCase() === 'я' &&
                     queueListening.queue.map(i => i.ID).indexOf(msg.from.id) === -1){
 
-                    while(queueListening.queue[queueListening.count] !== undefined){
+                    queueListening.count = 0;
+
+                    while(queueListening.queue[queueListening.count].ID !== undefined){
                         queueListening.count++;
                     }
-                    console.log('added');
+
+                    console.log(queueListening.count);
                     queueListening.queue[queueListening.count] = {
                         username: msg.from.username.replace(/[_*]/g,''),
                         name: msg.from.first_name,
@@ -194,12 +217,12 @@ start.then(
                     queueListening.queue.map(i => i.ID).indexOf(msg.from.id) === -1){
                     let index = parseInt(msg.text.split(' ')[1]);
 
-                    if( index <= 0 || index > 31){
+                    if( index < 0 || index > 31){
                         bot.sendMessage(msg.chat.id, 'ты, блять, тупой?');
                         index = 0;
                     }
 
-                    else if (queueListening.queue[index - 1] === undefined){
+                    else if (queueListening.queue[index - 1].ID === undefined){
                         queueListening.queue[index - 1] = {
                             username: msg.from.username.replace(/[_*]/g,''),
                             name: msg.from.first_name,
@@ -218,12 +241,10 @@ start.then(
                 {
                     let index = queueListening.queue.map(i => i.ID).indexOf(msg.from.id);
                     console.log('im minus');
-                    queueListening.queue[index] = undefined;
+                    clean_elem(queueListening,index);
                     bot.sendMessage(msg.chat.id, `${index+1}-е место освободилось`);
                 }
             }
-
-            // console.log(msg);
         })
 
 
