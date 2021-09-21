@@ -155,7 +155,7 @@ start.then(
 
         bot.onText(/\/07b_bot я достоин/, (msg) => {
             console.log('requested');
-            bot.sendMessage(475513670, msg.from.username + " достоин?");
+            bot.sendMessage(475513670, msg.from.username + " достоин(а)?");
             question.bool = true;
             question.who = msg.from.id;
             question.username = msg.from.username;
@@ -182,7 +182,7 @@ start.then(
                     }
 
                     else{
-                        bot.sendMessage(question.chat, "Мне сказали ты не достоин");
+                        bot.sendMessage(question.chat, "Мне сказали ты не достоин(а)");
                         question = {
                             bool: false,
                             who: 0,
@@ -211,7 +211,7 @@ start.then(
                     };
                     queueListening.count++;
 
-                    bot.sendMessage(msg.chat.id, msg.from.username + ' добавлен ' + queueListening.count + '-м');
+                    bot.sendMessage(msg.chat.id, msg.from.username + ' добавлен(а) ' + queueListening.count + '-м');
                 }
                 else if(msg.text.toLowerCase().search(/^я \d{1,2}$/) !== -1 &&
                     queueListening.queue.map(i => i.ID).indexOf(msg.from.id) === -1){
@@ -229,7 +229,7 @@ start.then(
                             ID: msg.from.id
                         };
 
-                        bot.sendMessage(msg.chat.id, msg.from.username + ' добавлен ' + index + '-м');
+                        bot.sendMessage(msg.chat.id, msg.from.username + ' добавлен(а) ' + index + '-м');
                     }
                     else{
                         bot.sendMessage(msg.chat.id, 'Место занято');
